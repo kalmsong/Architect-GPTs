@@ -6,7 +6,7 @@ app = Flask(__name__)
 @app.route("/geocode", methods=["GET"])
 def geocode():
     address = request.args.get("address")
-    type = request.args.get("type", "road")
+    type = request.args.get("type", "road")  # 기본값: 도로명 주소
 
     if not address:
         return jsonify({"error": "address 파라미터가 필요합니다."}), 400
@@ -23,10 +23,16 @@ def geocode():
     }
 
     try:
-        response = requests.get(api_url, params=params)
+        print(f"요청 URL: {api_url}")  # 디버깅용 로그
+        print(f"요청 파라미터: {params}")  # 디버깅용 로그
+
+        response = requests.get(api_url, params=params, timeout=10)
         response.raise_for_status()
+        print(f"응답 데이터: {response.json()}")  # 디버깅용 로그
+
         return jsonify(response.json())
     except requests.exceptions.RequestException as e:
+        print(f"VWorld API 요청 실패: {e}")  # 디버깅용 로그
         return jsonify({"error": "VWorld API 요청 실패", "details": str(e)}), 500
 
 if __name__ == "__main__":
