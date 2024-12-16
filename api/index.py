@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import requests
+import os
 
 app = Flask(__name__)
 
@@ -12,15 +13,17 @@ def geocode():
         return jsonify({"error": "address 파라미터가 필요합니다."}), 400
 
     api_url = "https://api.vworld.kr/req/address"
+    api_key = os.getenv("VWORLD_API_KEY")  # 환경 변수에서 인증키 가져오기
     params = {
-        "service": "address",
-        "request": "getcoord",
-        "crs": "epsg:4326",
-        "address": address,
-        "format": "json",
-        "type": type,
-        "key": "C4D98874-5F18-3AF8-90AC-25913420D1DF"
+    "service": "address",
+    "request": "getcoord",
+    "crs": "epsg:4326",
+    "address": address,
+    "format": "json",
+    "type": type,
+    "key": api_key
     }
+
 
     try:
         # 디버깅용 로그 출력
