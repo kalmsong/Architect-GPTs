@@ -1,4 +1,4 @@
-from flask import Flask, request, Response, jsonify
+from flask import Flask, request, jsonify
 import requests
 
 app = Flask(__name__)
@@ -11,7 +11,6 @@ def geocode():
     if not address:
         return jsonify({"error": "address 파라미터가 필요합니다."}), 400
 
-    # VWorld API 호출
     api_url = "https://api.vworld.kr/req/address"
     params = {
         "service": "address",
@@ -25,10 +24,16 @@ def geocode():
 
     try:
         response = requests.get(api_url, params=params)
-        response.raise_for_status()  # HTTP 오류 발생 시 예외 처리
-        return jsonify(response.json())
+        response.raise_for_status()
+        data = response.json()
+        
+        # VWorld API에서 액세스 거부나 오류 처리
+        if data.get("response", {}).get("status") != "OK":
+            return jsonify({"error": "VWorld API 오류", "details": data}), 502
+
+        return jsonify(data)
     except requests.exceptions.RequestException as e:
-        return jsonify({"error": "VWorld API 요청 실패", "details": str(e)}), 500
+        return jsonify({"error": "API 요청 실패", "details": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
