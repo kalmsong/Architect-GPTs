@@ -25,15 +25,9 @@ def geocode():
     try:
         response = requests.get(api_url, params=params)
         response.raise_for_status()
-        data = response.json()
-        
-        # VWorld API에서 액세스 거부나 오류 처리
-        if data.get("response", {}).get("status") != "OK":
-            return jsonify({"error": "VWorld API 오류", "details": data}), 502
-
-        return jsonify(data)
+        return jsonify(response.json())
     except requests.exceptions.RequestException as e:
-        return jsonify({"error": "API 요청 실패", "details": str(e)}), 500
+        return jsonify({"error": "VWorld API 요청 실패", "details": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
