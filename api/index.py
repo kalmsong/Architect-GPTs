@@ -1,23 +1,15 @@
 from flask import Flask, request, Response, jsonify
+import requests
 
 app = Flask(__name__)
-
-@app.route("/", methods=["GET"])
-def home():
-    return jsonify({
-        "message": "Welcome to Architect GPTs API",
-        "endpoints": {
-            "/geocode": "Geocode API endpoint. Use ?address=<address>&type=<type>"
-        }
-    })
 
 @app.route("/geocode", methods=["GET"])
 def geocode():
     address = request.args.get("address")
-    type = request.args.get("type", "road")  # 기본값: 도로명 주소
+    type = request.args.get("type", "road")
 
     if not address:
-        return Response("address 파라미터가 필요합니다.", status=400)
+        return jsonify({"error": "address 파라미터가 필요합니다."}), 400
 
     # VWorld API 호출
     api_url = "https://api.vworld.kr/req/address"
@@ -30,9 +22,13 @@ def geocode():
         "type": type,
         "key": "C4D98874-5F18-3AF8-90AC-25913420D1DF"
     }
-    response = requests.get(api_url, params=params)
 
-    return Response(response.text, status=response.status_code, content_type="application/json")
+    try:
+        response = requests.get(api_url, params=params)
+        response.raise_for_status()  # HTTP 오류 발생 시 예외 처리
+        return jsonify(response.json())
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": "VWorld API 요청 실패", "details": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)
