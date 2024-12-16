@@ -1,15 +1,7 @@
-from flask import Flask, request, Response, jsonify
+from flask import Flask, request, Response
+import requests
 
 app = Flask(__name__)
-
-@app.route("/", methods=["GET"])
-def home():
-    return jsonify({
-        "message": "Welcome to Architect GPTs API",
-        "endpoints": {
-            "/geocode": "Geocode API endpoint. Use ?address=<address>&type=<type>"
-        }
-    })
 
 @app.route("/geocode", methods=["GET"])
 def geocode():
@@ -31,7 +23,8 @@ def geocode():
         "key": "C4D98874-5F18-3AF8-90AC-25913420D1DF"
     }
     response = requests.get(api_url, params=params)
-
+    
+    # 결과 반환
     return Response(response.text, status=response.status_code, content_type="application/json")
 
 if __name__ == "__main__":
